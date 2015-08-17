@@ -7,6 +7,7 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+/* Sends data to the given socket, exiting the program if there was an error. */
 void mysend(int sock, const char *data, int data_length) {
 	int res;
 
@@ -16,6 +17,9 @@ void mysend(int sock, const char *data, int data_length) {
 	}
 }
 
+/* Receives a line from an IRC server socket, using a very dumb method of reading
+ * one character/byte at a time
+ */
 char *very_dumb_recv(int sock) {
 	char *str = NULL;
 	char c;
