@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
@@ -20,6 +21,20 @@ void mysend(int sock, const char *data, int data_length) {
 		exit(1);
 	}
 }
+
+/* Like printf(), except it sends to a socket instead of printing to the console. */
+void sendf(int sock, char *fmt, ...) {
+	va_list args;
+	char buffer[513];
+
+	va_start(args, fmt);
+	vsnprintf(buffer, 513, fmt, args);
+
+	printf("<-- %s", buffer);
+
+	mysend(sock, buffer, strlen(buffer));
+}
+
 
 /* Receives a line from an IRC server socket, using a very dumb method of reading
  * one character/byte at a time
@@ -59,8 +74,6 @@ int main(int argc, char *argv[]) {
 	struct addrinfo *servinfo;
 	char curip[INET_ADDRSTRLEN];
 
-	const char *handshake = "NICK " IRC_NICK "\r\nUSER " IRC_NICK " * * :" IRC_NICK "\r\n";
-
 	memset(&hints, 0, sizeof(hints));	
 
 	hints.ai_family = AF_INET;
@@ -93,14 +106,13 @@ int main(int argc, char *argv[]) {
 
 	printf("Connected!\n");
 
-
-	mysend(sock, handshake, strlen(handshake));
-
+	sendf(sock, "NICK %s\r\n", IRC_NICK);
+	sendf(sock, "USER %s * * :%s\r\n", IRC_NICK, IRC_NICK);
 
 	while (1) {
 		line = very_dumb_recv(sock);
 
-		printf("%s\n", line);
+		printf("--> %s\n", line);
 
 		free(line);
 	}
