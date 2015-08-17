@@ -7,6 +7,10 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 
+#define IRC_HOST "irc.canternet.org"
+#define IRC_PORT "6667"
+#define IRC_NICK "AppleDasht"
+
 /* Sends data to the given socket, exiting the program if there was an error. */
 void mysend(int sock, const char *data, int data_length) {
 	int res;
@@ -55,7 +59,7 @@ int main(int argc, char *argv[]) {
 	struct addrinfo *servinfo;
 	char curip[INET_ADDRSTRLEN];
 
-	const char *handshake = "NICK AppleDasht\r\nUSER AppleDasht * * :AppleDasht\r\n";
+	const char *handshake = "NICK " IRC_NICK "\r\nUSER " IRC_NICK " * * :" IRC_NICK "\r\n";
 
 	memset(&hints, 0, sizeof(hints));	
 
@@ -63,20 +67,18 @@ int main(int argc, char *argv[]) {
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
 
-	if ((res = getaddrinfo("irc.canternet.org", "6667", &hints, &servinfo)) != 0) {
+	if ((res = getaddrinfo(IRC_HOST, IRC_PORT, &hints, &servinfo)) != 0) {
 		printf("Some error occured: %s\n", gai_strerror(res));
 		return 1;
 	}
 
 	inet_ntop(servinfo->ai_family, &(((struct sockaddr_in *)servinfo->ai_addr)->sin_addr), curip, sizeof(curip));
-	printf("IP address for canternet is: %s\n", curip);
+	printf("IP address for the IRC server is: %s\n", curip);
 
 	if ((sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == -1) {
 		printf("Failed to create the socket!\n");
 		return 1;
 	}
-
-
 
 	printf("Created socket, the file descriptor is %d.\n", socket);
 
