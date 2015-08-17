@@ -77,6 +77,7 @@ int main(int argc, char *argv[]) {
 
 	if ((sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == -1) {
 		printf("Failed to create the socket!\n");
+		freeaddrinfo(servinfo);
 		return 1;
 	}
 
@@ -84,6 +85,7 @@ int main(int argc, char *argv[]) {
 
 	if ((res = connect(sock, servinfo->ai_addr, servinfo->ai_addrlen)) == -1) {
 		printf("An error occured connecting!\n");
+		freeaddrinfo(servinfo);
 		return 1;
 	}
 
