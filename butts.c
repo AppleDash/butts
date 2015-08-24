@@ -68,28 +68,32 @@ char *very_dumb_recv(int sock) {
 
 int main(int argc, char *argv[]) {
 	int res;
-	int sock;
+	int sock; /* This will be our socket file descriptor, which is really just a number. */
 	char *line;
 	struct addrinfo *p;
-	struct addrinfo hints;
-	struct addrinfo *servinfo;
+	struct addrinfo hints; /* Hints struct to tell getaddrinfo() what we want from it. */
+	struct addrinfo *servinfo; /* Pointer to a struct (technically a linked list of structs) which will contain the results of getaddrinfo() */
 	char curip[INET_ADDRSTRLEN];
 
-	memset(&hints, 0, sizeof(hints));	
+	memset(&hints, 0, sizeof(hints)); /* Zero out the hints struct to make sure it contains no garbage, which it may since it was allocated on the stack. */
 
-	hints.ai_family = AF_INET;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
+	/* Fill out the hints struct. */
+	hints.ai_family = AF_INET; /* Internet protocol */
+	hints.ai_socktype = SOCK_STREAM; /* TCP streaming sockets */
+	hints.ai_flags = AI_PASSIVE; /* The kernel will fill in our local IP for us. */
 
-	if ((res = getaddrinfo(IRC_HOST, IRC_PORT, &hints, &servinfo)) != 0) {
+	if ((res = getaddrinfo(IRC_HOST, IRC_PORT, &hints, &servinfo)) != 0) { /* Attempt to resolve our IRC server hostname to an IP address and fill it into the servinfo struct along with the IRC server port and socket() params. */
+		/* getaddrinfo() returned not 0, which indicates an error. */
 		printf("Some error occured: %s\n", gai_strerror(res));
 		return 1;
 	}
 
+	/* Conver the IP address represented as 4 bytes into a human readable dotted string, for printing. */
 	inet_ntop(servinfo->ai_family, &(((struct sockaddr_in *)servinfo->ai_addr)->sin_addr), curip, sizeof(curip));
 	printf("IP address for the IRC server is: %s\n", curip);
 
-	if ((sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == -1) {
+	if ((sock = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == -1) { /* Create our socket with the address family, socket type, and protocol family given to us in the results struct. (We chose these when filling out the hints struct.) */
+		/* socket() returned -1, error occured. */
 		printf("Failed to create the socket!\n");
 		freeaddrinfo(servinfo);
 		return 1;
@@ -97,16 +101,18 @@ int main(int argc, char *argv[]) {
 
 	printf("Created socket, the file descriptor is %d.\n", socket);
 
-	if ((res = connect(sock, servinfo->ai_addr, servinfo->ai_addrlen)) == -1) {
+	if ((res = connect(sock, servinfo->ai_addr, servinfo->ai_addrlen)) == -1) { /* Actually connect our socket to the IRC server, using the IP address and port in our servinfo struct. */
+		/* socket() returned -1, which indicates error. */
 		printf("An error occured connecting!\n");
 		freeaddrinfo(servinfo);
 		return 1;
 	}
 
-	freeaddrinfo(servinfo);
+	freeaddrinfo(servinfo); /* free the servinfo struct/list, which we no longer need here.*/
 
 	printf("Connected!\n");
 
+	/* From here, we just send our IRC handshake and then receive and print out lines infinitely. */
 	sendf(sock, "NICK %s\r\n", IRC_NICK);
 	sendf(sock, "USER %s * * :%s\r\n", IRC_NICK, IRC_NICK);
 
