@@ -45,24 +45,25 @@ char *very_dumb_recv(int sock) {
 	int length = 0;
 
 	while (1) {
-		if (recv(sock, &c, 1, 0) == -1) {
+		if (recv(sock, &c, 1, 0) == -1) { /* Perform the actual recv, reading one byte into our char variable `c`. `recv()` will block (wait at this line of code) until we get a byte on the socket. */
+			/* If recv() returned -1, some error happened. Just exit. */
 			printf("An error occured receiving!\n");
 			exit(1);
 		}
 
-		if (c == '\n') {
+		if (c == '\n') { /* If we've hit a newline, we know we have received an entire IRC line, so we leave our infinite loop. */
 			break;
 		}
 
-		length++;
+		length++; /* Since we just received a character (byte), increase the number of characters we've received */
 
-		str = (char *)realloc(str, length + 1);
+		str = (char *)realloc(str, length + 1); /* Reallocate the buffer containing the received line, to hold the number of bytes that we've now received, leaving one extra for the null terminator. */
 
-		str[length - 1] = c;
-		str[length] = 0;
+		str[length - 1] = c; /* Append the character to one before end of our newly reallocated buffer, overwriting the old null (byte 0) terminator */
+		str[length] = 0; /* Set the null terminator at the end of our buffer so C knows where our string ends. */
 	}
 
-	return str;
+	return str; /* Return the entire line to the caller once we leave the loop. */
 }
 
 int main(int argc, char *argv[]) {
