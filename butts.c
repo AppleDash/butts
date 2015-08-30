@@ -15,11 +15,21 @@
 /* Sends data to the given socket, exiting the program if there was an error. */
 void mysend(int sock, const char *data, int data_length) {
 	int res;
+	int bytes_sent;
 
-	if ((res = send(sock, data, data_length, 0)) == -1) {
-		printf("Failed to send data!\n");
-		exit(1);
-	}
+	bytes_sent = 0;
+
+	/* send() can sometimes not send all of our bytes, but it handily returns how many it actually sent.
+	 * We just keep retrying send() with any bytes that didn't get send until we've sent it all.
+	 */
+	do {
+		res = send(sock, data, data_length - bytes_sent, 0);
+		if (res == -1) {
+			printf("Failed to send data!\n");
+			exit(1); /* We just exit for now, better error handling comes later */
+		}
+		bytes_sent += res;
+	} while (bytes_sent < data_length);
 }
 
 /* Like printf(), except it sends to a socket instead of printing to the console. */
@@ -27,11 +37,16 @@ void sendf(int sock, char *fmt, ...) {
 	va_list args;
 	char buffer[513];
 
+	/* Do some fun stuff with varargs functions to emulate the behaviour of
+	 * printf() or sprintf() or similar.
+	 * This just replaces %s and %d etc in the format string with the arguments provided.
+	 */
 	va_start(args, fmt);
 	vsnprintf(buffer, 513, fmt, args);
 
 	printf("<-- %s", buffer);
 
+	/* Call our mysend() function above to handle sending the data to the socket. */
 	mysend(sock, buffer, strlen(buffer));
 }
 
