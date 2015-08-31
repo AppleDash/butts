@@ -114,7 +114,7 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 
-	printf("Created socket, the file descriptor is %d.\n", socket);
+	printf("Created socket, the file descriptor is %d.\n", sock);
 
 	if ((res = connect(sock, servinfo->ai_addr, servinfo->ai_addrlen)) == -1) { /* Actually connect our socket to the IRC server, using the IP address and port in our servinfo struct. */
 		/* socket() returned -1, which indicates error. */
