@@ -5,13 +5,14 @@ CFLAGS=-Wall -Wextra -Llib -llinebuf
 
 all: $(OUT)
 
-$(OUT): $(OBJECTS) lib/liblinebuf.a
+$(OUT): $(OBJECTS)
+	make liblinebuf
 	$(CC) -o $(OUT) $^ $(CFLAGS)
 
 %.o: %.c
 	$(CC) -c $< $(CFLAGS)
 
-lib/liblinebuf.a:
+liblinebuf:
 	make -C linebuf
 	cp linebuf/liblinebuf.a ./lib/
 
