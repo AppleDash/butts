@@ -1,0 +1,3 @@
+[submodule "linebuf"]
+	path = linebuf
+	url = git@github.com:AppleDash/linebuf.git
