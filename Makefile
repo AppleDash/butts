@@ -3,7 +3,7 @@ OBJECTS=$(patsubst %.c,%.o,$(wildcard *.c))
 OUT=butts
 CFLAGS=-Wall -Wextra -Llib -llinebuf
 
-all: linebuf $(OUT)
+all: $(OUT)
 
 $(OUT): $(OBJECTS) lib/liblinebuf.a
 	$(CC) -o $(OUT) $^ $(CFLAGS)
