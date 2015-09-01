@@ -1,3 +1,5 @@
 *.o
 *.exe
 butts
+/lib/*
+!/lib/.placeholder
